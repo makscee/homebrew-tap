@@ -4,7 +4,7 @@ class Claudev < Formula
   head "https://github.com/makscee/claudev.git", branch: "master"
 
   def install
-    bin.install "claudev"
+    bin.install "claudev.sh" => "claudev"
   end
 
   test do
