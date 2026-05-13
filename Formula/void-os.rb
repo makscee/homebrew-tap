@@ -15,7 +15,7 @@ class VoidOs < Formula
     if File.exist?("plugin/package.json")
       cd "plugin" do
         system "bun", "install", "--frozen-lockfile"
-        system "bun", "run", "build" if has_plugin_build_script?
+        system "bun", "run", "build" if plugin_build_script?
       end
     end
     # Explicit allowlist — keeps node_modules nested under daemon/, skips
@@ -24,11 +24,12 @@ class VoidOs < Formula
     libexec.install "plugin" if File.directory?("plugin")
     (bin/"void-os").write_env_script libexec/"bin/void-os",
                                      VOID_OS_PREFIX: libexec.to_s,
-                                     PATH: "#{Formula["bun"].opt_bin}:$PATH"
+                                     PATH:           "#{Formula["bun"].opt_bin}:$PATH"
   end
 
-  def has_plugin_build_script?
+  def plugin_build_script?
     return false unless File.exist?("plugin/package.json")
+
     pkg = JSON.parse(File.read("plugin/package.json"))
     pkg.dig("scripts", "build") ? true : false
   end
@@ -42,8 +43,8 @@ class VoidOs < Formula
     # the user provisioned via `void-os init`. Without this, `brew services`
     # under launchd may inherit HOME=/var/root and split-brain silently.
     environment_variables PATH:      std_service_path_env,
-                          HOME:      ENV["HOME"],
-                          VOID_HOME: "#{ENV["HOME"]}/void"
+                          HOME:      Dir.home,
+                          VOID_HOME: "#{Dir.home}/void"
   end
 
   test do
